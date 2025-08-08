@@ -7,6 +7,7 @@ Currently it's the only real DoS tool on github, i mean it is the only one who c
 Tested on Ubuntu and Termux.. Should work on all the plateforms.
 
 > ⚠️ **Disclaimer**: This tool is for **educational and authorized testing purposes only**. Unauthorized use against systems you don't own or have explicit permission to test is **illegal**
+
 > Don't attack .gov and .edu websites, it's the rule.
 
 ## 🚀 Features
