@@ -29,3 +29,8 @@ Tested on Ubuntu and Termux.. Should work on all the plateforms.
 git clone https://github.com/Lemophile/KrakenNet.git
 cd KrakenNet
 go run main.go
+```
+# Created by Lemophile
+**Discord : Piwiii2.0**
+
+Don't hesitate to do suggestions and drop a star, it will motivate me !
