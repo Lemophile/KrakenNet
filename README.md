@@ -1,34 +1,31 @@
-# KrakenNet 🐙
+# 🦑 KrakenNet - Web Killer v1.6
 
-**KrakenNet** is a Python-based Command & Control (C2 or CNC) system for managing multiple client bots. It allows you to execute remote shell commands, download files, manage tasks, and launch basic UDP flood attacks.
+KrakenNet is a high-performance HTTP DoS tool. It simulates random user traffic using rotating User-Agents, random HTTP methods, and dynamic paths. Optional proxy support is included to help bypass basic DDoS protections.
 
-> ⚠️ This tool is strictly for **educational and research purposes only**. Any unauthorized or malicious use is **forbidden**. The author is not responsible for any misuse or damage caused.
+Currently it's the only real DoS tool on github, i mean it is the only one who can really take down websites.
 
----
+Tested on Ubuntu and Termux.. Should work on all the plateforms.
 
-## 🧠 Features
+> ⚠️ **Disclaimer**: This tool is for **educational and authorized testing purposes only**. Unauthorized use against systems you don't own or have explicit permission to test is **illegal**.
 
-- Multi-client management via TCP sockets
-- Interactive remote shell access
-- File downloading from clients
-- UDP flood attack module
-- Task management and tracking
-- Client connection monitoring
-- Colored terminal output
-- Clean shutdown and signal handling
+## 🚀 Features
 
----
+- Random path generation and method rotation (GET, POST, HEAD)
+- Dynamic User-Agent switching
+- Optional HTTP proxy support via `http.txt` (You can replace it by your proxies file if you want)
+- Cloudflare bypass mode
+- Live statistics during and after attack (success, fail, RPS, server status)
+- Detection of server downtime (HTTP 500/502/503/504)
 
-## 📦 Requirements
+  # Future features
 
-- Python ≥ 3.7
-- No external libraries required
+  - More L7 methods
+  - Adding L4 methods
 
----
+## 🔧 Installation
 
-## 📥 Installation
-
+### Linux / Termux
 ```bash
-git clone https://github.com/Lemophile/KrakenNet
+git clone https://github.com/Lemophile/KrakenNet.git
 cd KrakenNet
-python3 cnc.py
+go run main.go
