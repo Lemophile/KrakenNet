@@ -24,17 +24,13 @@ Tested on Ubuntu and Termux.. Should work on all the plateforms.
 
 ## Powerproof
 
-![dstat]
-(Main/Screenshot_2025-08-06-20-42-47-149_com.android.chrome.jpg)
+![dstat](Main/Screenshot_2025-08-06-20-42-47-149_com.android.chrome.jpg)
 
-![website down]
-(Main/Screenshot_2025-08-06-18-48-23-290_com.android.chrome.jpg)
+![website down](Main/Screenshot_2025-08-06-18-48-23-290_com.android.chrome.jpg)
 
-![another one]
-(Main/Screenshot_2025-08-03-22-03-44-904_com.android.chrome.jpg)
+![another one](Main/Screenshot_2025-08-03-22-03-44-904_com.android.chrome.jpg)
 
-![another one]
-(Main/Screenshot_2025-08-03-18-21-53-107_com.android.chrome.jpg)
+![another one](Main/Screenshot_2025-08-03-18-21-53-107_com.android.chrome.jpg)
 
 ## 🔧 Installation
 
