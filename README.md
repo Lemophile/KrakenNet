@@ -17,10 +17,20 @@ Tested on Ubuntu and Termux.. Should work on all the plateforms.
 - Live statistics during and after attack (success, fail, RPS, server status)
 - Detection of server downtime (HTTP 500/502/503/504)
 
-  # Future features
+## Future features
 
   - More L7 methods
   - Adding L4 methods
+ 
+## Powerproofs
+
+![dsat](Screenshots/Screenshot_2025-08-03-18-21-53-107_com.android.chrome.jpg)
+
+![website](Screenshots/Screenshot_2025-08-03-22-03-44-904_com.android.chrome.jpg)
+
+![website](Screenshots/Screenshot_2025-08-06-18-48-23-290_com.android.chrome.jpg)
+
+![website](Screenshots/Screenshot_2025-08-06-20-42-47-149_com.android.chrome.jpg)
 
 ## 🔧 Installation
 
