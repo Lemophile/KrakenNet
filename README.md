@@ -8,6 +8,8 @@ Tested on Ubuntu and Termux.. Should work on all the plateforms.
 
 > ⚠️ **Disclaimer**: This tool is for **educational and authorized testing purposes only**. Unauthorized use against systems you don't own or have explicit permission to test is **illegal**.
 
+> Never target .gov or .edu websites.
+
 ## 🚀 Features
 
 - Random path generation and method rotation (GET, POST, HEAD)
