@@ -25,6 +25,7 @@ Tested on Ubuntu and Termux.. Should work on all the plateforms.
 - TLS (hight request per sec http/2 flood using TLS queries)
 - udp-discord (static data flood targeting discord VoIP servers with Dynamic RTC payload)
 - udp-bypass (randomized udp data + small packets)
+- udp-gbps (optimised udp attack for gbps)
   
 ## Future features
 
