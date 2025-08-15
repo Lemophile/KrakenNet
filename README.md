@@ -1,6 +1,6 @@
 # 🦑 KrakenNet - Web Killer v2.1
 
-KrakenNet is a high-performance HTTP DoS tool. It simulates random user traffic using rotating User-Agents, random HTTP methods, and dynamic paths. Optional proxy support is included to help bypass basic DDoS protections.
+KrakenNet is a high-performance L7 and L4 DoS tool. It simulates random user traffic using rotating User-Agents, random HTTP methods, and dynamic paths. Optional proxy support is included to help bypass basic DDoS protections.
 
 Currently it's the only real DoS tool on github, i mean it is the only one who can really take down websites.
 
@@ -21,11 +21,15 @@ Tested on Ubuntu and Termux.. Should work on all the plateforms.
 - Detection of server downtime (HTTP 500/502/503/504)
 
 ### other methods
+
 - TLS (hight request per sec http/2 flood using TLS queries)
+- udp-discord (static data flood targeting discord VoIP servers with Dynamic RTC payload)
+- udp-bypass (randomized udp data + small packets)
+  
 ## Future features
 
-  - More L7 methods
-  - Adding L4 methods
+  - Game methods (FiveM, minecraft, roblox)
+  - Adding raw methods
  
 ## Powerproofs
 
