@@ -5,6 +5,8 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"github.com/vexsx/KrakenNet/config"
+	"github.com/vexsx/KrakenNet/pkg"
 	"io"
 	"math/rand"
 	"net"
@@ -19,52 +21,9 @@ import (
 	"golang.org/x/net/http2"
 )
 
-const (
-	Reset   = "\033[0m"
-	Red     = "\033[31m"
-	Green   = "\033[32m"
-	Yellow  = "\033[33m"
-	Cyan    = "\033[36m"
-	Magenta = "\033[35m"
-)
-
 var userAgents []string
 var referers []string
 var methodsHTTP = []string{"GET", "POST", "HEAD"}
-
-func printBanner() {
-	banner := `
-
-                                            
-                                            
-                                            
-             :*####****+*####=              
-         .%#*=--=+++++++++=---+#%=          
-      .*#=-----+%========*%------=*#-       
-    .#*--------=%=-------+#---------+%=     
-   #*=--------=*%*-------*%*==--------+%.   
- :#=-------=#%%%%#-------*%%%%%*=------=#+  
- ++------+%%%%= ##------=%. .#%%%#-------#: 
- +%*=--=#%%= .=%%#------=%*%*: :#%%+---=%%: 
-  *%%##%%= :#+=-+%=-----=%=--=%* .%%#*#%%-  
-   :#%%#..%+----=%+-----=%=----=#= +%%%+    
-        .#-------%+-----=%=------#*         
-        .#%=----#%+-----=%%=----*%*         
-         =%%*=+%%%%#####%%%%#==%%#          
-           *%%%#.-%#===+%= *%%%%-           
-             .   %+-----=%   .              
-                 %+------*.                 
-                 %#=----+%.                 
-                 +%%%#%%%#                  
-                  .*%%%#-                   
-
-	KRAKEN NET - v2.1
-    Made by Piwiii2.0
-`
-	fmt.Print(Cyan)
-	fmt.Println(banner)
-	fmt.Print(Reset)
-}
 
 func loadListFromFile(filename string) []string {
 	file, err := os.Open(filename)
@@ -174,17 +133,17 @@ func runAttack() {
 	userAgents = loadListFromFile("useragents.txt")
 	referers = loadListFromFile("referers.txt")
 
-	fmt.Print(Yellow + "🌐 Target (URL or IP): " + Reset)
+	fmt.Print(color.Yellow + "🌐 Target (URL or IP): " + color.Reset)
 	target, _ := reader.ReadString('\n')
 	target = strings.TrimSpace(target)
 
-	fmt.Print(Yellow + "🛠 Select method :\nkraken\ntls\nudp-discord\nudp-bypass\nudp-gbps\n" + Reset)
+	fmt.Print(color.Yellow + "🛠 Select method :\nkraken\ntls\nudp-discord\nudp-bypass\nudp-gbps\n" + color.Reset)
 	mode, _ := reader.ReadString('\n')
 	mode = strings.TrimSpace(strings.ToLower(mode))
 
 	var connections int
 	if mode != "" {
-		fmt.Print(Yellow + "🔗 Connections per worker: " + Reset)
+		fmt.Print(color.Yellow + "🔗 Connections per worker: " + color.Reset)
 		cStr, _ := reader.ReadString('\n')
 		connections, _ = strconv.Atoi(strings.TrimSpace(cStr))
 		if connections < 1 {
@@ -192,14 +151,14 @@ func runAttack() {
 		}
 	}
 
-	fmt.Print(Yellow + "🔧 Number of workers: " + Reset)
+	fmt.Print(color.Yellow + "🔧 Number of workers: " + color.Reset)
 	wStr, _ := reader.ReadString('\n')
 	workers, _ := strconv.Atoi(strings.TrimSpace(wStr))
 	if workers < 1 {
 		workers = 10
 	}
 
-	fmt.Print(Yellow + "⏱️ Duration (in seconds): " + Reset)
+	fmt.Print(color.Yellow + "⏱️ Duration (in seconds): " + color.Reset)
 	dStr, _ := reader.ReadString('\n')
 	durationSec, _ := strconv.Atoi(strings.TrimSpace(dStr))
 	if durationSec < 1 {
@@ -209,7 +168,7 @@ func runAttack() {
 
 	var udpPort int
 	if mode == "udp-discord" || mode == "udp-bypass" || mode == "udp-gbps" {
-		fmt.Print(Yellow + "🎯 UDP Port (target): " + Reset)
+		fmt.Print(color.Yellow + "🎯 UDP Port (target): " + color.Reset)
 		portStr, _ := reader.ReadString('\n')
 		udpPort, _ = strconv.Atoi(strings.TrimSpace(portStr))
 		if udpPort < 1 {
@@ -217,7 +176,7 @@ func runAttack() {
 		}
 	}
 
-	fmt.Println(Green + "🚀 Attack starting..." + Reset)
+	fmt.Println(color.Green + "🚀 Attack starting..." + color.Reset)
 
 	var totalSuccess int64
 	var totalFail int64
@@ -297,36 +256,36 @@ func runAttack() {
 	if mode == "tls" || mode == "kraken" {
 		total := atomic.LoadInt64(&totalSuccess) + atomic.LoadInt64(&totalFail)
 		rps := float64(total) / float64(durationSec)
-		fmt.Println(Magenta + "🧨 Attack complete. Results:" + Reset)
-		fmt.Printf("%s✅ Success requests : %d%s\n", Green, totalSuccess, Reset)
-		fmt.Printf("%s❌ Failed requests  : %d%s\n", Red, totalFail, Reset)
-		fmt.Printf("%s⏱️ Duration         : %d seconds%s\n", Cyan, durationSec, Reset)
-		fmt.Printf("%s📈 Average RPS      : %.2f req/sec%s\n", Yellow, rps, Reset)
+		fmt.Println(color.Magenta + "🧨 Attack complete. Results:" + color.Reset)
+		fmt.Printf("%s✅ Success requests : %d%s\n", color.Green, totalSuccess, color.Reset)
+		fmt.Printf("%s❌ Failed requests  : %d%s\n", color.Red, totalFail, color.Reset)
+		fmt.Printf("%s⏱️ Duration         : %d seconds%s\n", color.Cyan, durationSec, color.Reset)
+		fmt.Printf("%s📈 Average RPS      : %.2f req/sec%s\n", color.Yellow, rps, color.Reset)
 	} else {
 		bytes := atomic.LoadInt64(&totalBytes)
 		bps := float64(bytes) / float64(durationSec)
-		fmt.Println(Magenta + "🧨 Attack complete. Results:" + Reset)
-		fmt.Printf("%s✅ Success packets : %d%s\n", Green, totalSuccess, Reset)
-		fmt.Printf("%s❌ Failed packets  : %d%s\n", Red, totalFail, Reset)
-		fmt.Printf("%s⏱️ Duration        : %d seconds%s\n", Cyan, durationSec, Reset)
-		fmt.Printf("%s📈 Average BPS     : %s%s\n", Yellow, formatBytes(bps), Reset)
+		fmt.Println(color.Magenta + "🧨 Attack complete. Results:" + color.Reset)
+		fmt.Printf("%s✅ Success packets : %d%s\n", color.Green, totalSuccess, color.Reset)
+		fmt.Printf("%s❌ Failed packets  : %d%s\n", color.Red, totalFail, color.Reset)
+		fmt.Printf("%s⏱️ Duration        : %d seconds%s\n", color.Cyan, durationSec, color.Reset)
+		fmt.Printf("%s📈 Average BPS     : %s%s\n", color.Yellow, formatBytes(bps), color.Reset)
 	}
 }
 
 func main() {
 	rand.Seed(time.Now().UnixNano())
-	printBanner()
+	pkg.PrintBanner()
 	reader := bufio.NewReader(os.Stdin)
 
 	for {
 		runAttack()
 
-		fmt.Print(Yellow + "\n🔄 Do you want to start another attack? (y/n): " + Reset)
+		fmt.Print(color.Yellow + "\n🔄 Do you want to start another attack? (y/n): " + color.Reset)
 		again, _ := reader.ReadString('\n')
 		again = strings.TrimSpace(strings.ToLower(again))
 
 		if again != "y" {
-			fmt.Println(Green + "👋 Bye! Hope you liked your attacks" + Reset)
+			fmt.Println(color.Green + "👋 Bye! Hope you liked your attacks" + color.Reset)
 			break
 		}
 	}
