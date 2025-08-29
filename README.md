@@ -48,7 +48,7 @@ cd KrakenNet
 go run main.go
 ```
 # Created by Lemophile & Vexsx
-**Discord : Piwiii2.0**
+**Discord : Piwiii2.0**  
 **Telegram: @vexsx**
 
 Don't hesitate to do suggestions and drop a star, it will motivate me !
