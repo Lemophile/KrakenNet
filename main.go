@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/vexsx/KrakenNet/config"
 	"github.com/vexsx/KrakenNet/pkg"
+	"log"
 	"math/rand"
 	"os"
 	"strings"
@@ -17,7 +18,12 @@ func main() {
 	reader := bufio.NewReader(os.Stdin)
 
 	for {
-		pkg.RunAttack()
+		in, err := pkg.PromptInputs()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		in.RunAttack()
 
 		fmt.Print(color.Yellow + "\n🔄 Do you want to start another attack? (y/n): " + color.Reset)
 		again, _ := reader.ReadString('\n')
