@@ -2,7 +2,7 @@ package pkg
 
 import (
 	"fmt"
-	color "github.com/vexsx/KrakenNet/config"
+	color "github.com/vexsx/KrakenNet/color"
 )
 
 func PrintBanner() {

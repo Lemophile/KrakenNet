@@ -3,7 +3,7 @@ package pkg
 import (
 	"bufio"
 	"fmt"
-	color "github.com/vexsx/KrakenNet/config"
+	color "github.com/vexsx/KrakenNet/color"
 	"io"
 	"os"
 	"strconv"

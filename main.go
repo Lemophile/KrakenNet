@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"github.com/vexsx/KrakenNet/color"
 	"github.com/vexsx/KrakenNet/config"
 	"github.com/vexsx/KrakenNet/pkg"
 	"log"
@@ -16,6 +17,7 @@ func main() {
 	rand.Seed(time.Now().UnixNano())
 	pkg.PrintBanner()
 	reader := bufio.NewReader(os.Stdin)
+	config.LoadLists("useragents.txt", "referers.txt")
 
 	for {
 		in, err := pkg.PromptInputs()
