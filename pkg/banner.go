@@ -17,7 +17,7 @@ func PrintBanner() {
 `
 
 	authors := `
-	KRAKEN NET - v2.2
+	KRAKEN NET - v3
 	Made by Piwiii2.0 Edited by Vexsx
 
 `
