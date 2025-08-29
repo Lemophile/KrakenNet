@@ -1,4 +1,4 @@
-# 🦑 KrakenNet - Web Killer v2.1
+# 🦑 KrakenNet - Web Killer v3
 
 KrakenNet is a high-performance L7 and L4 DoS tool. It simulates random user traffic using rotating User-Agents, random HTTP methods, and dynamic paths. Optional proxy support is included to help bypass basic DDoS protections.
 
@@ -32,25 +32,23 @@ Tested on Ubuntu and Termux.. Should work on all the plateforms.
   - Game methods (FiveM, minecraft, roblox)
   - Adding raw methods
  
-## Powerproofs
+## LOOKS
 
-![dsat](Screenshots/Screenshot_2025-08-03-18-21-53-107_com.android.chrome.jpg)
+![dsat](Screenshots/img.png)
 
-![website](Screenshots/Screenshot_2025-08-03-22-03-44-904_com.android.chrome.jpg)
 
-![website](Screenshots/Screenshot_2025-08-06-18-48-23-290_com.android.chrome.jpg)
-
-![website](Screenshots/Screenshot_2025-08-06-20-42-47-149_com.android.chrome.jpg)
 
 ## 🔧 Installation
 
 ### Linux / Termux
+You must have Go v1.25.0 then
 ```bash
-git clone https://github.com/Lemophile/KrakenNet.git
+git clone https://github.com/vexsx/KrakenNet.git
 cd KrakenNet
 go run main.go
 ```
-# Created by Lemophile
-**Discord : Piwiii2.0**
+# Created by Lemophile & Vexsx
+**Discord : Piwiii2.0**  
+**Telegram: @vexsx**
 
 Don't hesitate to do suggestions and drop a star, it will motivate me !
