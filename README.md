@@ -15,7 +15,7 @@ Tested on Ubuntu and Termux.. Should work on all the plateforms.
 ### for kraken method (the one i created)
 - Random path generation and method rotation (GET, POST, HEAD)
 - Dynamic User-Agent switching
-- Optional HTTP proxy support via `http.txt` (You can replace it by your proxies file if you want)
+- HTTP proxy support via `http.txt` (You can replace it by your proxies file if you want)
 - Cloudflare bypass mode
 - Live statistics during and after attack (success, fail, RPS, server status)
 - Detection of server downtime (HTTP 500/502/503/504)
@@ -26,10 +26,11 @@ Tested on Ubuntu and Termux.. Should work on all the plateforms.
 - udp-discord (static data flood targeting discord VoIP servers with Dynamic RTC payload)
 - udp-bypass (randomized udp data + small packets)
 - udp-gbps (optimised udp attack for gbps)
+- Fivem (optimised for fivem servers)
+- Minecraft (optimised for Minecraft servers)
   
 ## Future features
 
-  - Game methods (FiveM, minecraft, roblox)
   - Adding raw methods
  
 ## Powerproofs
@@ -48,7 +49,9 @@ Tested on Ubuntu and Termux.. Should work on all the plateforms.
 ```bash
 git clone https://github.com/Lemophile/KrakenNet.git
 cd KrakenNet
-go run main.go
+go mod init KrakenNet
+go mod tidy
+CGO_ENABLED=0 go run main.go
 ```
 # Created by Lemophile
 **Discord : Piwiii2.0**
