@@ -1,6 +1,6 @@
 # 🦑 KrakenNet - v2.5
 
-KrakenNet is a high-performance L7 and L4 DoS tool. It simulates random user traffic using rotating User-Agents, random HTTP methods, and dynamic paths. Optional proxy support is included to help bypass basic DDoS protections.
+KrakenNet is a high-performance L7 and L4 DoS tool. It simulates random user traffic using rotating User-Agents, random HTTP methods, and dynamic paths. Proxy support is included to help bypass basic DDoS protections.
 
 Currently it's the only real DoS tool on github, i mean it is the only one who can really take down websites.
 
