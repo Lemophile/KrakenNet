@@ -1,4 +1,4 @@
-# 🦑 KrakenNet - Web Killer v2.1
+# 🦑 KrakenNet - Web Killer v2.5
 
 KrakenNet is a high-performance L7 and L4 DoS tool. It simulates random user traffic using rotating User-Agents, random HTTP methods, and dynamic paths. Optional proxy support is included to help bypass basic DDoS protections.
 
